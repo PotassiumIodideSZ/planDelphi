@@ -1,0 +1,108 @@
+unit Unit10;
+
+
+interface
+
+uses
+  Windows, Messages, SysUtils, Classes, Graphics, Controls, Forms, Dialogs,
+  Buttons, ExtCtrls,printers;
+
+type
+  TForm10 = class(TForm)
+    ToolBar: TPanel;
+    PrintSB: TSpeedButton;
+    procedure FormCreate(Sender: TObject);
+    procedure FormDestroy(Sender: TObject);
+    procedure FormPaint(Sender: TObject);
+    procedure FormResize(Sender: TObject);
+    procedure InitGlobals;
+    procedure FormActivate(Sender: TObject);
+    procedure PrintSBClick(Sender: TObject);
+  private
+    { Private declarations }
+  public
+    { Public declarations }
+  end;
+
+var
+  Form10: TForm10;
+
+implementation
+  uses
+    Unit4;
+{$R *.DFM}
+const
+  border=10;
+{-------------------------------------------------}
+procedure TForm10.FormCreate(Sender: TObject);
+begin
+  PreBits:=TBitmap.create;
+end;
+{-------------------------------------------------}
+procedure TForm10.FormDestroy(Sender: TObject);
+begin
+  PreBits.Free;
+end;
+{-------------------------------------------------}
+procedure TForm10.FormPaint(Sender: TObject);
+var
+  raz:Trect;
+begin
+   with Form10.Canvas do begin
+       raz:=ClientRect;
+       Brush.color:=clGray;{FonColIzo;}
+       Pen.color:=clBlack;{FonColIzo;}
+       Rectangle(raz.Left,raz.Top,raz.right,raz.bottom);
+     end;
+   Canvas.Draw(ClientWidth div 4, ToolBar.Height +border,PreBits);
+end;
+{-------------------------------------------------}
+procedure TForm10.InitGlobals;
+begin
+  PreBits.Width:=ClientWidth div 2;
+  PreBits.Height:=Round(1.3*Prebits.Width);{страница(1.3=8,5x11)}
+  PpiX:=Round(PreBits.Width/8.5);
+  PpiY:=Round(PreBits.Height/11.0);
+  if WindowState<>wsMaximized then
+    ClientHeight:= ToolBar.Height+Prebits.Height+border*2;
+end;{InitGlobals}
+{-------------------------------------------------}
+procedure TForm10.FormResize(Sender: TObject);
+var
+  rmashX,rmashY:real;
+begin
+  InitGlobals;
+  rmashX:=ppiX/PixelsPerInchY;
+  rmashY:=ppiY/PixelsPerInchY;
+  PrintGr(PreBits.Canvas,2,rmashX,rmashY,clWhite);
+  Invalidate;
+end;
+{-------------------------------------------------}
+procedure TForm10.FormActivate(Sender: TObject);
+var
+  rmashX,rmashY:real;
+begin
+  InitGlobals;
+  rmashX:=ppiX/PixelsPerInchY;
+  rmashY:=ppiY/PixelsPerInchY;
+  PrintGr(PreBits.Canvas,2,rmashX,rmashY,clWhite);
+  Invalidate;
+end;
+{-------------------------------------------------}
+procedure TForm10.PrintSBClick(Sender: TObject);
+var
+  rmashX,rmashY:real;
+  RX,RY:real;
+begin
+  Printer.BeginDoc;
+  InitGlobals;
+  RX:=printer.PageWidth/8.5;
+  RY:=printer.PageHeight/11.0;
+  rmashX:=RX/PixelsPerInchY;
+  rmashY:=RY/PixelsPerInchY;
+  PrintGr(Printer.Canvas,3,rmashX,rmashY,clWhite);
+  Invalidate;
+  Printer.EndDoc;
+end;
+
+end.
